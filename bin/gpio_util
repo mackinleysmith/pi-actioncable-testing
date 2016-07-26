@@ -6,23 +6,23 @@ ACTION=""
 WAIT_FREQUENCY=0.1
 
 while getopts ":a:d:p:" opt; do
-    case $opt in
-  a)
+  case $opt in
+    a)
       ACTION=$OPTARG
       ;;
-        d)
+    d)
       DIRECTION=$OPTARG
-            ;;
-        p)
-            PIN=$OPTARG
       ;;
-    esac
+    p)
+      PIN=$OPTARG
+      ;;
+  esac
 done
 shift $((OPTIND-1)) # Pop all getopts arguments out of the stack.
 
 if [ "$PIN" = "0" ]; then
-    echo "You must specify a pin with -p."
-    exit 1
+  echo "You must specify a pin with -p."
+  exit 1
 fi
 
 GPIO_DIR="/sys/class/gpio"
@@ -32,21 +32,20 @@ PIN_DIR="$GPIO_DIR/gpio$PIN"
 gpio-admin export $PIN
 echo "$DIRECTION" > $PIN_DIR/direction
 if [ "$DIRECTION" = "out" ]; then
-    echo "$@" > $PIN_DIR/value
+  echo "$@" > $PIN_DIR/value
 elif [ "$DIRECTION" = "in" ]; then
-    if [ "$ACTION" = "wait_for_up" ]; then
-        while [ "$(cat $PIN_DIR/value)" = "0" ]; do
+  if [ "$ACTION" = "wait_for_up" ]; then
+    while [ "$(cat $PIN_DIR/value)" = "0" ]; do
       sleep $WAIT_FREQUENCY
-  done
-    elif [ "$ACTION" = "wait_for_down" ]; then
-        while [ "$(cat $PIN_DIR/value)" = "1" ]; do
+    done
+  elif [ "$ACTION" = "wait_for_down" ]; then
+    while [ "$(cat $PIN_DIR/value)" = "1" ]; do
       sleep $WAIT_FREQUENCY
-  done
-    else
-        echo "$(cat $PIN_DIR/value)"
-    fi
+    done
+  else
+    echo "$(cat $PIN_DIR/value)"
+  fi
 fi
 gpio-admin unexport $PIN
-# `echo "$PIN" > $GPIO_DIR/unexport
 
 exit 0
