@@ -28,7 +28,8 @@ fi
 GPIO_DIR="/sys/class/gpio"
 PIN_DIR="$GPIO_DIR/gpio$PIN"
 
-gpio-admin export $PIN
+echo "$PIN" > $GPIO_DIR/export
+# gpio-admin export $PIN
 echo "$DIRECTION" > $PIN_DIR/direction
 if [ "$DIRECTION" = "out" ]; then
   echo "$@" > $PIN_DIR/value
@@ -45,6 +46,7 @@ elif [ "$DIRECTION" = "in" ]; then
     echo "$(cat $PIN_DIR/value)"
   fi
 fi
-gpio-admin unexport $PIN
+# gpio-admin unexport $PIN
+echo "$PIN" > $GPIO_DIR/unexport
 
 exit 0
