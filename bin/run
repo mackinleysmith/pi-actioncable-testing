@@ -2,6 +2,8 @@
 
 require 'action_cable_client'
 
+GPIO_UTIL_PATH = '/home/mackinleysmith/pi-actioncable-testing/bin/gpio_util'
+
 EventMachine.run do
 
   uri = 'ws://localhost:3000/cable'
@@ -16,7 +18,11 @@ EventMachine.run do
   end
 
   # called whenever a message is received from the server
-  client.received {|msg| puts msg }
+  client.received do |msg|
+    puts "Message received: #{msg}"
+    gpio_output = msg['message']['gpio_output']
+    `sudo #{GPIO_UTIL_PATH} -p #{gpio_output['pin']} #{gpio_output['value']}`
+  end
   client.errored  {|msg| puts msg }
 
   client.disconnected { puts 'disconnected.' }
