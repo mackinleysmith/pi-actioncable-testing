@@ -28,7 +28,6 @@ fi
 GPIO_DIR="/sys/class/gpio"
 PIN_DIR="$GPIO_DIR/gpio$PIN"
 
-# echo "$PIN" > $GPIO_DIR/export
 gpio-admin export $PIN
 echo "$DIRECTION" > $PIN_DIR/direction
 if [ "$DIRECTION" = "out" ]; then
