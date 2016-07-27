@@ -34,10 +34,9 @@ EventMachine.run do
 
   # called whenever a message is received from the server
   outputs_channel.received do |msg|
-    puts "Message received: #{msg}"
-    puts 'OUTPUT RECEIVED!'
+    puts "Output received: #{msg}"
     gpio_output = msg['message']['gpio_output']
-    `#{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
+    `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
   end
 
   outputs_channel.disconnected { puts 'Outputs disconnected!' }
@@ -54,11 +53,19 @@ EventMachine.run do
 
   # called whenever a message is received from the server
   inputs_channel.received do |msg|
-    puts "Message received: #{msg}"
-    puts 'INPUT RECEIVED!'
+    puts "Input received: #{msg}"
     gpio_input = msg['message']['gpio_input']
-    result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down`
-    puts "Result: #{result}"
+    case gpio_input['mode']
+      when 'read'
+        result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down`
+        puts "Result: #{result}"
+      when 'wait_for_up'
+        `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down -a wait_for_up`
+        puts "#{gpio_input['pin']} went up!"
+      when 'wait_for_down'
+        `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m up -a wait_for_down`
+        puts "#{gpio_input['pin']} went down!"
+    end
   end
 
   inputs_channel.errored {|msg| puts msg }
