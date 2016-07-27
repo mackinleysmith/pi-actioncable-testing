@@ -35,6 +35,7 @@ echo Unexporting...
 gpio-admin unexport $PIN > /dev/null 2>&1
 echo Exporting...
 gpio-admin export $PIN
+echo Exported
 
 echo "$DIRECTION" > $PIN_DIR/direction
 if [ "$DIRECTION" = "out" ]; then
