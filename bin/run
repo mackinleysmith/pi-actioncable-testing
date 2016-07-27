@@ -36,8 +36,15 @@ EventMachine.run do
   # called whenever a message is received from the server
   client.received do |msg|
     puts "Message received: #{msg}"
-    gpio_output = msg['message']['gpio_output']
-    `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
+    case msg['identifier']['channel']
+      when 'GpioOutputsChannel'
+        gpio_output = msg['message']['gpio_output']
+        `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
+      when 'GpioInputsChannel'
+        gpio_input = msg['message']['gpio_input']
+        result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']}`
+        puts "Result: #{result}"
+    end
   end
 
   client.errored  {|msg| puts msg }
