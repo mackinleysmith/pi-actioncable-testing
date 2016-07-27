@@ -31,11 +31,8 @@ PIN_DIR="$GPIO_DIR/gpio$PIN"
 # echo "$PIN" > $GPIO_DIR/unexport 2> /dev/null
 # echo "$PIN" > $GPIO_DIR/export
 
-echo Unexporting...
-gpio-admin unexport $PIN > /dev/null 2>&1
-echo Exporting...
-gpio-admin export $PIN
-echo Exported
+gpio-admin unexport $PIN 2> /dev/null
+gpio-admin export $PIN 2> /dev/null
 
 echo "$DIRECTION" > $PIN_DIR/direction
 if [ "$DIRECTION" = "out" ]; then
