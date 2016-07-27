@@ -24,32 +24,36 @@ end.parse!
 EventMachine.run do
   uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable_port]}/cable"
 
-  client = ActionCableClient.new(uri, 'GpioOutputsChannel')
+  outputs_channel = ActionCableClient.new(uri, 'GpioOutputsChannel')
 
-  client.connected { puts 'successfully connected.' }
-
-  client.subscribed do
-    puts 'subscribed.'
-    client.perform('follow', {})
+  outputs_channel.subscribed do
+    outputs_channel.perform('follow', {})
   end
 
   # called whenever a message is received from the server
-  client.received do |msg|
+  outputs_channel.received do |msg|
     puts "Message received: #{msg}"
-    case msg['identifier']['channel']
-      when 'GpioOutputsChannel'
-        puts 'OUTPUT RECEIVED!'
-        gpio_output = msg['message']['gpio_output']
-        `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
-      when 'GpioInputsChannel'
-        puts 'INPUT RECEIVED!'
-        gpio_input = msg['message']['gpio_input']
-        result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']}`
-        puts "Result: #{result}"
-    end
+    puts 'OUTPUT RECEIVED!'
+    gpio_output = msg['message']['gpio_output']
+    `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
   end
 
-  client.errored  {|msg| puts msg }
+  outputs_channel.errored  {|msg| puts msg }
 
-  client.disconnected { puts 'disconnected.' }
+  inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
+
+  inputs_channel.subscribed do
+    inputs_channel.perform('follow', {})
+  end
+
+  # called whenever a message is received from the server
+  inputs_channel.received do |msg|
+    puts "Message received: #{msg}"
+    puts 'INPUT RECEIVED!'
+    gpio_input = msg['message']['gpio_input']
+    result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']}`
+    puts "Result: #{result}"
+  end
+
+  inputs_channel.errored  {|msg| puts msg }
 end
