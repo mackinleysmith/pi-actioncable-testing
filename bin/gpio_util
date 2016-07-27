@@ -47,6 +47,7 @@ elif [ "$DIRECTION" = "in" ]; then
   else
     echo "$(cat $PIN_DIR/value)"
   fi
+  echo "$PIN" > $GPIO_DIR/unexport
 fi
 # gpio-admin unexport $PIN
 # echo "$PIN" > $GPIO_DIR/unexport
