@@ -57,7 +57,7 @@ EventMachine.run do
     puts "Message received: #{msg}"
     puts 'INPUT RECEIVED!'
     gpio_input = msg['message']['gpio_input']
-    result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']}`
+    result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in`
     puts "Result: #{result}"
   end
 
