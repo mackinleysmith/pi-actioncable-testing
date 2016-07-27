@@ -35,13 +35,9 @@ if [ "$DIRECTION" = "out" ]; then
   gpio -g write $PIN $@
 elif [ "$DIRECTION" = "in" ]; then
   if [ "$ACTION" = "wait_for_up" ]; then
-    while [ "$(gpio -g read $PIN)" = "0" ]; do
-      sleep $WAIT_FREQUENCY
-    done
+    gpio -g wfi $PIN rising
   elif [ "$ACTION" = "wait_for_down" ]; then
-    while [ "$(gpio -g read $PIN)" = "1" ]; do
-      sleep $WAIT_FREQUENCY
-    done
+    gpio -g wfi $PIN falling
   else
     echo "$(gpio -g read $PIN)"
   fi
