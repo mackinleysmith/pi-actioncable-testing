@@ -26,6 +26,11 @@ EventMachine.run do
 
   outputs_channel = ActionCableClient.new(uri, 'GpioOutputsChannel')
 
+  outputs_channel.connected do
+    puts 'Outputs connected!'
+  end
+
+
   outputs_channel.subscribed do
     outputs_channel.perform('follow', {})
   end
@@ -36,6 +41,10 @@ EventMachine.run do
     puts 'OUTPUT RECEIVED!'
     gpio_output = msg['message']['gpio_output']
     `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
+  end
+
+  outputs_channel.disconnected do
+    puts 'Outputs disconnected!'
   end
 
   outputs_channel.errored  {|msg| puts msg }
