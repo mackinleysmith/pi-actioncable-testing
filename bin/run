@@ -40,20 +40,20 @@ EventMachine.run do
 
   outputs_channel.errored  {|msg| puts msg }
 
-  inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
-
-  inputs_channel.subscribed do
-    inputs_channel.perform('follow', {})
-  end
-
-  # called whenever a message is received from the server
-  inputs_channel.received do |msg|
-    puts "Message received: #{msg}"
-    puts 'INPUT RECEIVED!'
-    gpio_input = msg['message']['gpio_input']
-    result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']}`
-    puts "Result: #{result}"
-  end
-
-  inputs_channel.errored  {|msg| puts msg }
+  # inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
+  #
+  # inputs_channel.subscribed do
+  #   inputs_channel.perform('follow', {})
+  # end
+  #
+  # # called whenever a message is received from the server
+  # inputs_channel.received do |msg|
+  #   puts "Message received: #{msg}"
+  #   puts 'INPUT RECEIVED!'
+  #   gpio_input = msg['message']['gpio_input']
+  #   result = `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']}`
+  #   puts "Result: #{result}"
+  # end
+  #
+  # inputs_channel.errored  {|msg| puts msg }
 end
