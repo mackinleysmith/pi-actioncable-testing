@@ -4,14 +4,18 @@ PIN="0"
 DIRECTION="out"
 ACTION=""
 WAIT_FREQUENCY=0.1
+MODE="out"
 
-while getopts ":a:d:p:" opt; do
+while getopts ":a:d:m:p:" opt; do
   case $opt in
     a)
       ACTION=$OPTARG
       ;;
     d)
       DIRECTION=$OPTARG
+      ;;
+    m)
+      MODE=$OPTARG
       ;;
     p)
       PIN=$OPTARG
@@ -25,34 +29,22 @@ if [ "$PIN" = "0" ]; then
   exit 1
 fi
 
-GPIO_DIR="/sys/class/gpio"
-PIN_DIR="$GPIO_DIR/gpio$PIN"
+gpio -g mode $PIN $MODE
 
-# echo "$PIN" > $GPIO_DIR/unexport 2> /dev/null
-# echo "$PIN" > $GPIO_DIR/export
-
-gpio-admin unexport $PIN 2> /dev/null
-gpio-admin export $PIN 2> /dev/null
-
-echo "$DIRECTION" > $PIN_DIR/direction
 if [ "$DIRECTION" = "out" ]; then
-  echo "$@" > $PIN_DIR/value
+  gpio -g write $PIN $@
 elif [ "$DIRECTION" = "in" ]; then
   if [ "$ACTION" = "wait_for_up" ]; then
-    while [ "$(cat $PIN_DIR/value)" = "0" ]; do
+    while [ "$(gpio -g read $PIN)" = "0" ]; do
       sleep $WAIT_FREQUENCY
     done
   elif [ "$ACTION" = "wait_for_down" ]; then
-    while [ "$(cat $PIN_DIR/value)" = "1" ]; do
+    while [ "$(gpio -g read $PIN)" = "1" ]; do
       sleep $WAIT_FREQUENCY
     done
   else
-    echo "$(cat $PIN_DIR/value)"
+    echo "$(gpio -g read $PIN)"
   fi
-  # echo "$PIN" > $GPIO_DIR/unexport
-  gpio-admin unexport $PIN
 fi
-# gpio-admin unexport $PIN
-# echo "$PIN" > $GPIO_DIR/unexport
 
 exit 0
