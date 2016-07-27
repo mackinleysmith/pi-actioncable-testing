@@ -4,7 +4,7 @@ require 'action_cable_client'
 require 'optparse'
 
 DEFAULTS = {
-  gpio_util_path: '/home/mackinleysmith/pi-actioncable-testing/bin/gpio_util',
+  gpio_util_path: '/home/mackinley/pi-actioncable-testing/bin/gpio_util',
   action_cable_host: 'localhost',
   action_cable_port: '3000'
 }
