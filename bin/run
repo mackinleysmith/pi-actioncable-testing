@@ -1,17 +1,33 @@
 #!/usr/bin/env ruby
 
 require 'action_cable_client'
+require 'optparse'
 
-GPIO_UTIL_PATH = '/home/mackinleysmith/pi-actioncable-testing/bin/gpio_util'
+DEFAULTS = {
+  gpio_util_path: '/home/mackinleysmith/pi-actioncable-testing/bin/gpio_util',
+  action_cable_host: 'localhost',
+  action_cable_port: '3000'
+}
+parsed_options = DEFAULTS.dup
+OptionParser.new do |opts|
+  opts.on('-g', '--gpioutil-path=port', 'Path to gpio_util') do |v|
+    parsed_options[:gpio_util_path] = v
+  end
+  opts.on('-h', '--actioncable-host=host', 'ActionCable Host') do |v|
+    parsed_options[:action_cable_host] = v
+  end
+  opts.on('-p', '--actioncable-port=port', 'ActionCable Port') do |v|
+    parsed_options[:action_cable_port] = v
+  end
+end.parse!
 
 EventMachine.run do
+  uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable_port]}/cable"
 
-  uri = 'ws://localhost:3000/cable'
   client = ActionCableClient.new(uri, 'GpioOutputsChannel')
-  # the connected callback is required, as it triggers
-  # the actual subscribing to the channel but it can just be
-  # client.connected {}
+
   client.connected { puts 'successfully connected.' }
+
   client.subscribed do
     puts 'subscribed.'
     client.perform('follow', {})
@@ -21,13 +37,10 @@ EventMachine.run do
   client.received do |msg|
     puts "Message received: #{msg}"
     gpio_output = msg['message']['gpio_output']
-    `sudo #{GPIO_UTIL_PATH} -p #{gpio_output['pin']} #{gpio_output['value']}`
+    `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}`
   end
+
   client.errored  {|msg| puts msg }
 
   client.disconnected { puts 'disconnected.' }
-
-  # adds to a queue that is purged upon receiving of
-  # a ping from the server
-  # client.perform('speak', { message: 'hello from amc' })
 end
