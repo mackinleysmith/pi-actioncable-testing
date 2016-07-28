@@ -37,7 +37,7 @@ EventMachine.run do
     puts "Output received: #{msg}"
     gpio_output = msg['message']['gpio_output']
     Thread.new do
-      system "sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
+      system "#{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
     end
   end
 
