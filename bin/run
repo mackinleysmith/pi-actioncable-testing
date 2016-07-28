@@ -22,46 +22,42 @@ OptionParser.new do |opts|
 end.parse!
 
 uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable_port]}/cable"
-outputs_channel = nil
-inputs_channel = nil
 
-output_thread = Thread.new do
-  EventMachine.run do
-    outputs_channel = ActionCableClient.new(uri, 'GpioOutputsChannel')
+EventMachine.run do
+  outputs_channel = ActionCableClient.new(uri, 'GpioOutputsChannel')
 
-    outputs_channel.connected { puts 'Outputs connected!' }
+  outputs_channel.connected { puts 'Outputs connected!' }
 
-    outputs_channel.subscribed do
-      outputs_channel.perform('follow', {})
-    end
+  outputs_channel.subscribed do
+    outputs_channel.perform('follow', {})
+  end
 
-    # called whenever a message is received from the server
-    outputs_channel.received do |msg|
-      puts "Output received: #{msg}"
-      gpio_output = msg['message']['gpio_output']
+  # called whenever a message is received from the server
+  outputs_channel.received do |msg|
+    puts "Output received: #{msg}"
+    gpio_output = msg['message']['gpio_output']
+    Thread.new do
       system "sudo #{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
     end
-
-    outputs_channel.disconnected { puts 'Outputs disconnected!' }
-
-    outputs_channel.errored {|msg| puts msg }
   end
-end
 
-input_thread = Thread.new do
-  EventMachine.run do
-    inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
+  outputs_channel.disconnected { puts 'Outputs disconnected!' }
 
-    inputs_channel.connected { puts 'Inputs connected!' }
+  outputs_channel.errored {|msg| puts msg }
 
-    inputs_channel.subscribed do
-      inputs_channel.perform('follow', {})
-    end
+  inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
 
-    # called whenever a message is received from the server
-    inputs_channel.received do |msg|
-      puts "Input received: #{msg}"
-      gpio_input = msg['message']['gpio_input']
+  inputs_channel.connected { puts 'Inputs connected!' }
+
+  inputs_channel.subscribed do
+    inputs_channel.perform('follow', {})
+  end
+
+  # called whenever a message is received from the server
+  inputs_channel.received do |msg|
+    puts "Input received: #{msg}"
+    gpio_input = msg['message']['gpio_input']
+    Thread.new do
       case gpio_input['mode']
         when 'read'
           system("#{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down")
@@ -76,13 +72,9 @@ input_thread = Thread.new do
           outputs_channel.perform('create', {pin: 17, value: 0})
       end
     end
-
-    inputs_channel.errored {|msg| puts msg }
-
-    inputs_channel.disconnected { puts 'Inputs disconnected!' }
   end
-end
 
-# Wait for threads to finish before exiting.
-output_thread.join
-input_thread.join
+  inputs_channel.errored {|msg| puts msg }
+
+  inputs_channel.disconnected { puts 'Inputs disconnected!' }
+end
