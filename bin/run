@@ -65,7 +65,7 @@ EventMachine.run do
         inputs_channel.perform('create', {pin: 23, mode: 'wait_for_down'})
         outputs_channel.perform('create', {pin: 17, value: 1})
       when 'wait_for_down'
-        `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m up -a wait_for_down`
+        `sudo #{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down -a wait_for_down`
         puts "#{gpio_input['pin']} went down!"
         outputs_channel.perform('create', {pin: 17, value: 0})
     end
