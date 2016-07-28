@@ -22,6 +22,8 @@ OptionParser.new do |opts|
 end.parse!
 
 uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable_port]}/cable"
+outputs_channel = nil
+inputs_channel = nil
 
 output_thread = Thread.new do
   EventMachine.run do
