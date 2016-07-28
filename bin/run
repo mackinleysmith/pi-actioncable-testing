@@ -23,7 +23,7 @@ end.parse!
 
 uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable_port]}/cable"
 
-Thread.new do
+output_thread = Thread.new do
   EventMachine.run do
     outputs_channel = ActionCableClient.new(uri, 'GpioOutputsChannel')
 
@@ -46,7 +46,7 @@ Thread.new do
   end
 end
 
-Thread.new do
+input_thread = Thread.new do
   EventMachine.run do
     inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
 
@@ -81,3 +81,7 @@ Thread.new do
     inputs_channel.disconnected { puts 'Inputs disconnected!' }
   end
 end
+
+# Wait for threads to finish before exiting.
+output_thread.join
+input_thread.join
