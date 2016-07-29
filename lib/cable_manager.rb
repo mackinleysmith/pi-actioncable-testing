@@ -3,9 +3,10 @@ require 'action_cable_client'
 class CableManager
   DEFAULT_ACTIONCABLE_URI = 'ws://localhost:3000/cable'
 
-  def initialize(channel_name, uri: DEFAULT_ACTIONCABLE_URI)
+  def initialize(channel_name, uri: DEFAULT_ACTIONCABLE_URI, &reception_callback)
     @channel_name = channel_name
     @uri = uri
+    @reception_callback = reception_callback
   end
 
   def connect!
@@ -33,6 +34,7 @@ class CableManager
 
   def handle_reception(msg)
     puts "Message received from #{channel_name}: #{msg}"
+    reception_callback.(msg)
   end
 
   def handle_disconnection
@@ -45,7 +47,7 @@ class CableManager
   end
 
   private
-  attr_reader :channel_name, :uri
+  attr_reader :channel_name, :uri, :reception_callback
 
   def channel
     @channel ||= ActionCableClient.new uri, channel_name
