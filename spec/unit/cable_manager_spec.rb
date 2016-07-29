@@ -12,6 +12,14 @@ RSpec.describe CableManager do
     allow(ActionCableClient).to receive(:new).and_return(mock_client)
   end
 
+  describe '#perform' do
+    it 'calls #perform on the ActionCableClient instance' do
+      subject.perform('something', {foo: 'bar'})
+
+      expect(mock_client).to have_received(:perform).with('something', {foo: 'bar'})
+    end
+  end
+
   describe '#connect!' do
     it 'initializes an ActionCableClient with the specified channel name' do
       subject.connect!

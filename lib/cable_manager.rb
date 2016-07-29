@@ -9,6 +9,10 @@ class CableManager
     @reception_callback = reception_callback
   end
 
+  def perform(action, options={})
+    channel.perform action, options
+  end
+
   def connect!
     install_hooks!
   end
@@ -59,9 +63,5 @@ class CableManager
     channel.received {|msg| handle_reception(msg) }
     channel.disconnected { handle_disconnection }
     channel.errored {|msg| handle_error(msg) }
-  end
-
-  def perform(action, options={})
-    channel.perform action, options
   end
 end
