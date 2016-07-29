@@ -15,6 +15,7 @@ class CableManager
 
   def connect!
     install_hooks!
+    self
   end
 
   def follow!

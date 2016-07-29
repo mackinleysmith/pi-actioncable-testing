@@ -21,6 +21,10 @@ RSpec.describe CableManager do
   end
 
   describe '#connect!' do
+    it 'returns self' do
+      expect(subject.connect!).to eq subject
+    end
+
     it 'initializes an ActionCableClient with the specified channel name' do
       subject.connect!
 

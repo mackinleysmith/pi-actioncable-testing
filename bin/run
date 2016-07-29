@@ -28,8 +28,7 @@ EventMachine.run do
   output_manager = CableManager.new('GpioOutputsChannel', uri: uri) do |msg|
     gpio_output = msg['message']['gpio_output']
     system "#{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
-  end
-  output_manager.connect!
+  end.connect!
 
   inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
 
