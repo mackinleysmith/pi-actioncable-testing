@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
+require 'eventmachine'
+require_relative '../lib/cable_manager'
 
 DEFAULTS = {
   gpio_util_path: '/home/mackinley/pi-actioncable-testing/bin/gpio_util',
