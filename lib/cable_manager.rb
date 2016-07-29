@@ -38,7 +38,7 @@ class CableManager
 
   def handle_reception(msg)
     puts "Message received from #{channel_name}: #{msg}"
-    reception_callback.(msg)
+    Thread.new { reception_callback.(msg) }
   end
 
   def handle_disconnection

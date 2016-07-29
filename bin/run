@@ -26,10 +26,8 @@ uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable
 
 EventMachine.run do
   output_manager = CableManager.new('GpioOutputsChannel', uri: uri) do |msg|
-    Thread.new do
-      gpio_output = msg['message']['gpio_output']
-      system "#{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
-    end
+    gpio_output = msg['message']['gpio_output']
+    system "#{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
   end
   output_manager.connect!
 
