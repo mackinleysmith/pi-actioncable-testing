@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'action_cable_client'
 require 'optparse'
 
 DEFAULTS = {
@@ -24,18 +23,9 @@ end.parse!
 uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable_port]}/cable"
 
 EventMachine.run do
-  manager = CableManager.new('GpioOutputsChannel', uri: uri)
-  manager.connect!
+  output_manager = CableManager.new 'GpioOutputsChannel', uri: uri
+  output_manager.connect!
 
-  # outputs_channel = ActionCableClient.new(uri, 'GpioOutputsChannel')
-  #
-  # outputs_channel.connected { puts 'Outputs connected!' }
-  #
-  # outputs_channel.subscribed do
-  #   outputs_channel.perform('follow', {})
-  # end
-  #
-  # # called whenever a message is received from the server
   # outputs_channel.received do |msg|
   #   puts "Output received: #{msg}"
   #   gpio_output = msg['message']['gpio_output']
@@ -43,10 +33,6 @@ EventMachine.run do
   #     system "#{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
   #   end
   # end
-  #
-  # outputs_channel.disconnected { puts 'Outputs disconnected!' }
-  #
-  # outputs_channel.errored {|msg| puts msg }
 
   inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
 
