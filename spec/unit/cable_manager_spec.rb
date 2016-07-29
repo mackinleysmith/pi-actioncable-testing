@@ -39,12 +39,10 @@ RSpec.describe CableManager do
       expect(ActionCableClient).to have_received(:new).with(default_uri, channel_name)
     end
 
-    it 'initializes an ActionCableClient with the specified channel name' do
+    it 'initializes an ActionCableClient with the specified uri' do
       described_class.new(channel_name, uri: 'http://something.com').connect!
 
       expect(ActionCableClient).to have_received(:new).with('http://something.com', channel_name)
     end
-
-    it ''
   end
 end

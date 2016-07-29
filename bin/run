@@ -23,27 +23,6 @@ end.parse!
 
 uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable_port]}/cable"
 
-class CableManager
-  DEFAULT_ACTIONCABLE_URI = 'ws://localhost:3000/cable'
-
-  def initialize(channel_name, uri: DEFAULT_ACTIONCABLE_URI)
-    @channel_name = channel_name
-    @uri = uri
-  end
-
-  def connect!
-    channel.connected { puts 'HI' }
-    true
-  end
-
-  private
-  attr_reader :channel_name, :uri
-
-  def channel
-    @channel ||= ActionCableClient.new uri, channel_name
-  end
-end
-
 EventMachine.run do
   manager = CableManager.new('GpioOutputsChannel', uri: uri)
   manager.connect!
