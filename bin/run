@@ -30,36 +30,20 @@ EventMachine.run do
     system "#{parsed_options[:gpio_util_path]} -p #{gpio_output['pin']} #{gpio_output['value']}"
   end.connect!
 
-  inputs_channel = ActionCableClient.new(uri, 'GpioInputsChannel')
-
-  inputs_channel.connected { puts 'Inputs connected!' }
-
-  inputs_channel.subscribed do
-    inputs_channel.perform('follow', {})
-  end
-
-  # called whenever a message is received from the server
-  inputs_channel.received do |msg|
-    puts "Input received: #{msg}"
+  input_manager = CableManager.new('GpioInputsChannel', uri: uri) do |msg|
     gpio_input = msg['message']['gpio_input']
-    Thread.new do
-      case gpio_input['mode']
-        when 'read'
-          system("#{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down")
-        when 'wait_for_up'
-          system("#{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down -a wait_for_up")
-          puts "#{gpio_input['pin']} went up!"
-          inputs_channel.perform('create', {pin: 23, mode: 'wait_for_down'})
-          output_manager.perform('create', {pin: 17, value: 1})
-        when 'wait_for_down'
-          system("#{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down -a wait_for_down")
-          puts "#{gpio_input['pin']} went down!"
-          output_manager.perform('create', {pin: 17, value: 0})
-      end
+    case gpio_input['mode']
+      when 'read'
+        system("#{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down")
+      when 'wait_for_up'
+        system("#{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down -a wait_for_up")
+        puts "#{gpio_input['pin']} went up!"
+        inputs_channel.perform('create', {pin: 23, mode: 'wait_for_down'})
+        output_manager.perform('create', {pin: 17, value: 1})
+      when 'wait_for_down'
+        system("#{parsed_options[:gpio_util_path]} -p #{gpio_input['pin']} -d in -m down -a wait_for_down")
+        puts "#{gpio_input['pin']} went down!"
+        output_manager.perform('create', {pin: 17, value: 0})
     end
-  end
-
-  inputs_channel.errored {|msg| puts msg }
-
-  inputs_channel.disconnected { puts 'Inputs disconnected!' }
+  end.connect!
 end
