@@ -1,5 +1,5 @@
 class GpioUtil
-  BIN_PATH = File.expand_path('bin/gpio_util', __FILE__)
+  BIN_PATH = File.expand_path('../bin/gpio_util', __FILE__)
 
   def initialize(pin:)
     @pin = pin
@@ -17,6 +17,6 @@ class GpioUtil
   attr_reader :pin
 
   def command_pin!(pin, command)
-    system "#{BIN_PATH} -p #{pin} #{command}"
+    Kernel.system "#{BIN_PATH} -p #{pin} #{command}"
   end
 end
