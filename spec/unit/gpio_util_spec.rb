@@ -6,7 +6,10 @@ RSpec.describe GpioUtil, type: :unit do
 
   subject { described_class.new pin: valid_pin }
 
-  before { allow(Kernel).to receive(:system) }
+  before do
+    allow(Kernel).to receive(:system)
+    allow(subject).to receive(:`)
+  end
 
   describe 'BIN_PATH' do
     it 'points to a valid file' do
@@ -32,15 +35,36 @@ RSpec.describe GpioUtil, type: :unit do
   end
 
   describe '.read' do
-    it 'defaults to "read" mode' do
-      expect(subject).to receive(:command_pin!) {|cmd| cmd =~ /-a read/ }
-
-      expect { subject.read }.not_to raise_error
+    it 'requires a block' do
+      expect { subject.read }.to raise_error LocalJumpError
     end
 
-    it 'calls system' do
-      subject.read
-      expect(Kernel).to have_received(:system)
+    it 'calls the block passed to it with the value of the pin' do
+      expect(subject).to receive(:read_from_pin).and_return 1
+
+      expect {|b| subject.read(&b) }.to yield_with_args 1
+    end
+
+    it 'defaults to "read" mode, which uses backticks' do
+      expect { subject.read {} }.not_to raise_error
+
+      expect(subject).to have_received(:`) {|cmd| cmd =~ /-a read/ }
+    end
+
+    context 'when mode is wait_for_up' do
+      it 'calls system' do
+        subject.read(mode: 'wait_for_up') {}
+
+        expect(Kernel).to have_received(:system)
+      end
+    end
+
+    context 'when mode is wait_for_down' do
+      it 'calls system' do
+        subject.read(mode: 'wait_for_down') {}
+
+        expect(Kernel).to have_received(:system)
+      end
     end
   end
 

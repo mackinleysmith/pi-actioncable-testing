@@ -10,9 +10,8 @@ class GpioUtil
   end
 
   def read(mode: 'read')
-    yield(read_from_pin) and return if mode == 'read'
-    command_pin! "-d in -m down -a #{mode}"
-    yield(read_from_pin) if block_given?
+    command_pin!("-d in -m down -a #{mode}") unless mode == 'read'
+    yield read_from_pin
   end
 
   protected
