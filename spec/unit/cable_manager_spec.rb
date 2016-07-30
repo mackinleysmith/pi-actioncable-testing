@@ -65,14 +65,15 @@ RSpec.describe CableManager do
 
     it 'calls #received, which calls #handle_reception, which calls the reception_callback' do
       mock_reception_callback = proc {}
-      expect(mock_reception_callback).to receive(:call).with('Some Message')
+      mock_message = {some: 'message'}
+      expect(mock_reception_callback).to receive(:call).with(mock_message)
       subject = described_class.new(channel_name, &mock_reception_callback)
       allow(subject).to receive(:handle_reception).and_call_original
 
       subject.connect!
 
       expect(mock_client).to have_received(:received).with(no_args) do |*_, &block|
-        block.('Some Message')
+        block.(mock_message)
         expect(subject).to have_received(:handle_reception)
       end
     end
