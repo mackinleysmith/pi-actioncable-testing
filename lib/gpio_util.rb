@@ -19,9 +19,7 @@ class GpioUtil
   attr_reader :pin
 
   def command_pin!(command)
-    formulated_command = formulate_command command
-    puts "Command: #{formulated_command}"
-    Kernel.system formulated_command
+    Kernel.system formulate_command command
   end
 
   def read_from_pin
