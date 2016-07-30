@@ -23,22 +23,22 @@ uri = "ws://#{parsed_options[:action_cable_host]}:#{parsed_options[:action_cable
 
 EventMachine.run do
   output_manager = CableManager.new('GpioOutputsChannel', uri: uri) do |msg|
-    gpio_output = msg['message']['gpio_output'].deep_symbolize_keys
-    GpioUtil.new(pin: gpio_output['pin']).write value: gpio_output['value']
+    gpio_output = msg[:message][:gpio_output].deep_symbolize_keys
+    GpioUtil.new(pin: gpio_output[:pin]).write value: gpio_output[:value]
   end.connect!
 
   input_manager = CableManager.new('GpioInputsChannel', uri: uri) do |msg|
-    gpio_input = msg['message']['gpio_input'].deep_symbolize_keys
-    GpioUtil.new(pin: gpio_input['pin']).read mode: gpio_input['mode'] do |value|
-      case gpio_input['mode']
+    gpio_input = msg[:message][:gpio_input].deep_symbolize_keys
+    GpioUtil.new(pin: gpio_input[:pin]).read mode: gpio_input[:mode] do |value|
+      case gpio_input[:mode]
         when 'read'
         when 'wait_for_up'
-          puts "#{gpio_input['pin']} went up!"
-          input_manager.perform('create', {pin: 23, mode: 'wait_for_down'})
-          output_manager.perform('create', {pin: 17, value: 1})
+          puts "#{gpio_input[:pin]} went up!"
+          input_manager.perform('create', pin: 23, mode: 'wait_for_down')
+          output_manager.perform('create', pin: 17, value: 1)
         when 'wait_for_down'
-          puts "#{gpio_input['pin']} went down!"
-          output_manager.perform('create', {pin: 17, value: 0})
+          puts "#{gpio_input[:pin]} went down!"
+          output_manager.perform('create', pin: 17, value: 0)
       end
     end
   end.connect!
