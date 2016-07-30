@@ -6,7 +6,6 @@ class GpioUtil
   end
 
   def write(value:)
-    puts "ATTEMPTING WRITE!"
     command_pin! value
   end
 
@@ -20,7 +19,9 @@ class GpioUtil
   attr_reader :pin
 
   def command_pin!(command)
-    Kernel.system formulate_command command
+    formulated_command = formulate_command command
+    puts "Command: #{formulated_command}"
+    Kernel.system formulated_command
   end
 
   def read_from_pin
