@@ -17,6 +17,6 @@ class GpioUtil
   attr_reader :pin
 
   def command_pin!(pin, command)
-    Kernel.system "#{BIN_PATH} -p #{pin} #{command}"
+    system "#{BIN_PATH} -p #{pin} #{command}"
   end
 end
