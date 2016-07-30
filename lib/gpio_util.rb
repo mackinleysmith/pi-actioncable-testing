@@ -6,6 +6,7 @@ class GpioUtil
   end
 
   def write(value:)
+    puts "ATTEMPTING WRITE!"
     command_pin! value
   end
 
