@@ -32,6 +32,7 @@ EventMachine.run do
     GpioUtil.new(pin: gpio_input[:pin]).read mode: gpio_input[:mode] do |value|
       case gpio_input[:mode]
         when 'read'
+          puts "#{gpio_input[:pin]} reads #{value}!"
         when 'wait_for_up'
           puts "#{gpio_input[:pin]} went up!"
           input_manager.perform('create', pin: 23, mode: 'wait_for_down')
