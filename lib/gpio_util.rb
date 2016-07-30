@@ -1,5 +1,5 @@
 class GpioUtil
-  BIN_PATH = File.expand_path('../bin/gpio_util', __FILE__)
+  BIN_PATH = File.expand_path('../../bin/gpio_util', __FILE__)
 
   def initialize(pin:)
     @pin = pin
