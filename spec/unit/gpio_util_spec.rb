@@ -7,8 +7,12 @@ RSpec.describe GpioUtil, type: :unit do
   subject { described_class.new pin: valid_pin }
 
   before do
-    allow(Kernel).to receive(:system)
+    allow(subject).to receive(:system)
     allow(subject).to receive(:`)
+  end
+
+  def expect_gpio_received(expected_cmd)
+    expect(subject).to have_received(:system).at_least(:once).with("gpio -g #{expected_cmd}")
   end
 
   describe 'BIN_PATH' do
@@ -23,48 +27,53 @@ RSpec.describe GpioUtil, type: :unit do
     end
   end
 
-  describe '.write' do
+  describe '#export' do
+    it 'calls the gpio with a valid command' do
+      subject.export
+      expect_gpio_received "mode #{valid_pin} out"
+    end
+  end
+
+  describe '#write' do
     it 'requires a value' do
       expect { subject.write }.to raise_error ArgumentError
     end
 
-    it 'calls system' do
+    it 'calls the gpio with a valid command' do
       subject.write(value: 1)
-      expect(Kernel).to have_received(:system)
+      expect_gpio_received "write #{valid_pin} 1"
     end
   end
 
-  describe '.read' do
+  describe '#read' do
+    it 'uses backticks' do
+      expect { subject.read }.not_to raise_error
+
+      expect(subject).to have_received(:`) {|cmd| cmd =~ /-a read/ }
+    end
+  end
+
+  describe '#wait_for' do
     it 'requires a block' do
-      expect { subject.read }.to raise_error LocalJumpError
+      expect { subject.wait_for(1) }.to raise_error LocalJumpError
     end
 
     it 'calls the block passed to it with the value of the pin' do
       expect(subject).to receive(:read_from_pin).and_return 1
 
-      expect {|b| subject.read(&b) }.to yield_with_args 1
+      expect {|b| subject.wait_for(1, &b) }.to yield_with_args 1
     end
 
-    it 'defaults to "read" mode, which uses backticks' do
-      expect { subject.read {} }.not_to raise_error
+    it 'calls gpio wfi with "rising" for 1' do
+      subject.wait_for(1) {}
 
-      expect(subject).to have_received(:`) {|cmd| cmd =~ /-a read/ }
+      expect_gpio_received "wfi #{valid_pin} rising"
     end
 
-    context 'when mode is wait_for_up' do
-      it 'calls system' do
-        subject.read(mode: 'wait_for_up') {}
+    it 'calls gpio wfi with "falling" for 0' do
+      subject.wait_for(0) {}
 
-        expect(Kernel).to have_received(:system)
-      end
-    end
-
-    context 'when mode is wait_for_down' do
-      it 'calls system' do
-        subject.read(mode: 'wait_for_down') {}
-
-        expect(Kernel).to have_received(:system)
-      end
+      expect_gpio_received "wfi #{valid_pin} falling"
     end
   end
 

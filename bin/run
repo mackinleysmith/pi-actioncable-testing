@@ -29,18 +29,21 @@ EventMachine.run do
 
   input_manager = CableManager.new('GpioInputsChannel', uri: uri) do |msg|
     gpio_input = msg[:message][:gpio_input].deep_symbolize_keys
-    GpioUtil.new(pin: gpio_input[:pin]).read mode: gpio_input[:mode] do |value|
-      case gpio_input[:mode]
-        when 'read'
-          puts "#{gpio_input[:pin]} reads #{value}!"
-        when 'wait_for_up'
+    util = GpioUtil.new(pin: gpio_input[:pin])
+    case gpio_input[:mode]
+      when 'read'
+        puts "#{gpio_input[:pin]} reads #{util.read}!"
+      when 'wait_for_up'
+        util.wait_for(1) do
           puts "#{gpio_input[:pin]} went up!"
           input_manager.perform('create', pin: 23, mode: 'wait_for_down')
           output_manager.perform('create', pin: 17, value: 1)
-        when 'wait_for_down'
+        end
+      when 'wait_for_down'
+        util.wait_for(0) do
           puts "#{gpio_input[:pin]} went down!"
           output_manager.perform('create', pin: 17, value: 0)
-      end
+        end
     end
   end.connect!
 end
