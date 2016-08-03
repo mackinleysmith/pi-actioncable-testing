@@ -15,12 +15,6 @@ RSpec.describe GpioUtil, type: :unit do
     expect(subject).to have_received(:system).at_least(:once).with("gpio -g #{expected_cmd}")
   end
 
-  describe 'BIN_PATH' do
-    it 'points to a valid file' do
-      expect(File.exists?(described_class::BIN_PATH)).to be
-    end
-  end
-
   describe '.new' do
     it 'requires a pin' do
       expect { described_class.new }.to raise_error ArgumentError
