@@ -38,7 +38,7 @@ class GpioUtil
   end
 
   def write(value:)
-    export(set_mode: 'out')
+    export(set_mode: 'out') if mode == 'in'
 
     if using_soft_pwm?
       command_pi_blaster! "#{pin}=#{value}"
