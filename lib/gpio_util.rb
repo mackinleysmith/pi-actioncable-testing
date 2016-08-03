@@ -38,7 +38,7 @@ class GpioUtil
   end
 
   def write(value:)
-    export(set_mode: 'out') if mode == 'in'
+    export unless exported?
 
     if using_soft_pwm?
       command_pi_blaster! "#{pin}=#{value}"
@@ -48,11 +48,12 @@ class GpioUtil
   end
 
   def read
+    export(set_mode: 'in') unless exported?
     read_from_pin
   end
 
   def wait_for(value, with_mode: nil)
-    export(set_mode: 'in')
+    export(set_mode: 'in') unless exported?
     export(set_mode: with_mode) if with_mode
 
     command_pin! 'wfi', case value
