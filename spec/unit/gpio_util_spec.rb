@@ -22,9 +22,33 @@ RSpec.describe GpioUtil, type: :unit do
   end
 
   describe '#export' do
-    it 'calls the gpio with a valid command' do
+    it 'calls the gpio to export the pin with a valid command' do
       subject.export
+
+      expect_gpio_received "export #{valid_pin}"
+    end
+
+    it 'sets the mode to "out" by default' do
+      subject.export
+
       expect_gpio_received "mode #{valid_pin} out"
+    end
+
+    it 'sets the mode to any specified set_mode key' do
+      subject.export set_mode: 'in'
+
+      expect_gpio_received "mode #{valid_pin} in"
+    end
+  end
+
+  describe '#unexport' do
+    before { allow(subject).to receive(:exported?).and_return true }
+
+    it 'calls the gpio to unexport the pin with a valid command' do
+
+      subject.unexport
+
+      expect_gpio_received "unexport #{valid_pin}"
     end
   end
 

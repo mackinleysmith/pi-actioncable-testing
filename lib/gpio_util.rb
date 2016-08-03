@@ -43,7 +43,7 @@ class GpioUtil
   protected
 
   def command_pin!(command, values=nil)
-    command_gpio! "#{command} #{pin} #{values}"
+    command_gpio! "#{command} #{pin} #{values}".strip
   end
 
   def read_from_pin
