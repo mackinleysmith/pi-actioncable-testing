@@ -14,6 +14,22 @@ RSpec.describe GpioUtil, type: :unit do
   def expect_gpio_received(expected_cmd)
     expect(subject).to have_received(:system).at_least(:once).with("gpio -g #{expected_cmd}")
   end
+  def expect_gpio_not_called
+    expect(subject).not_to have_received(:system).with(/^gpio/)
+  end
+  def expect_gpio_not_called_with(unexpected_cmd)
+    expect(subject).not_to have_received(:system).with("gpio -g #{unexpected_cmd}")
+  end
+
+  def expect_pi_blaster_received(expected_cmd)
+    expect(subject).to have_received(:system).at_least(:once).with("echo \"#{expected_cmd}\" > /dev/pi-blaster")
+  end
+  def expect_pi_blaster_not_called
+    expect(subject).not_to have_received(:system).with(/> \/dev\/pi-blaster$/)
+  end
+  def expect_pi_blaster_not_called_with(unexpected_cmd)
+    expect(subject).not_to have_received(:system).with("echo \"#{unexpected_cmd}\" > /dev/pi-blaster")
+  end
 
   describe '.new' do
     it 'requires a pin' do
@@ -39,16 +55,42 @@ RSpec.describe GpioUtil, type: :unit do
 
       expect_gpio_received "mode #{valid_pin} in"
     end
+
+    it 'calls unexport if the pin was previously exported in a different mode' do
+      allow(subject).to receive(:exported?).and_return(true)
+      expect(subject).to receive(:unexport)
+
+      subject.export set_mode: 'in'
+    end
+
+    context 'when mode is soft_pwm' do
+      it 'calls out to pi-blaster instead of gpio' do
+        subject.export set_mode: 'soft_pwm'
+
+        expect_gpio_not_called
+        expect_pi_blaster_received "#{valid_pin}=1"
+      end
+    end
   end
 
   describe '#unexport' do
     before { allow(subject).to receive(:exported?).and_return true }
 
     it 'calls the gpio to unexport the pin with a valid command' do
-
       subject.unexport
 
       expect_gpio_received "unexport #{valid_pin}"
+    end
+
+    context 'when mode is soft_pwm' do
+      it 'calls out to pi-blaster instead of gpio' do
+        allow(subject).to receive(:mode).and_return('soft_pwm')
+
+        subject.unexport
+
+        expect_gpio_not_called
+        expect_pi_blaster_received "release #{valid_pin}"
+      end
     end
   end
 
@@ -58,8 +100,19 @@ RSpec.describe GpioUtil, type: :unit do
     end
 
     it 'calls the gpio with a valid command' do
-      subject.write(value: 1)
+      subject.write value: 1
       expect_gpio_received "write #{valid_pin} 1"
+    end
+
+    context 'when mode is soft_pwm' do
+      it 'calls out to pi-blaster instead of gpio' do
+        allow(subject).to receive(:mode).and_return('soft_pwm')
+
+        subject.write value: 1
+
+        expect_gpio_not_called
+        expect_pi_blaster_received "#{valid_pin}=1"
+      end
     end
   end
 

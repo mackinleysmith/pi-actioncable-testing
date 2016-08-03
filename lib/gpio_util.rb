@@ -5,23 +5,46 @@ class GpioUtil
     @exported = false
   end
 
+  def using_soft_pwm?
+    mode == 'soft_pwm'
+  end
+
   def export(set_mode: @mode)
     return if exported? && set_mode == mode
-    command_pin! 'export'
-    command_pin! 'mode', set_mode
+
+    unexport if exported?
     @mode = set_mode
+
+    if using_soft_pwm?
+      command_pi_blaster! "#{pin}=1"
+    else
+      command_pin! 'export'
+      command_pin! 'mode', mode
+    end
+
     @exported = true
   end
 
   def unexport
     return unless exported?
-    command_pin! 'unexport'
+
+    if using_soft_pwm?
+      command_pi_blaster! "release #{pin}"
+    else
+      command_pin! 'unexport'
+    end
+
     @exported = false
   end
 
   def write(value:)
     export(set_mode: 'out')
-    command_pin! 'write', value
+
+    if using_soft_pwm?
+      command_pi_blaster! "#{pin}=#{value}"
+    else
+      command_pin! 'write', value
+    end
   end
 
   def read
@@ -44,6 +67,10 @@ class GpioUtil
 
   def command_pin!(command, values=nil)
     command_gpio! "#{command} #{pin} #{values}".strip
+  end
+
+  def command_pi_blaster!(cmd)
+    system "echo \"#{cmd}\" > /dev/pi-blaster"
   end
 
   def read_from_pin
