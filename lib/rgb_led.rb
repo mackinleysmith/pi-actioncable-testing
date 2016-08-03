@@ -36,15 +36,15 @@ class RgbLed
   attr_reader :red_pin, :green_pin, :blue_pin
 
   def red
-    @red ||= GpioUtil.new(pin: red_pin)
+    @red ||= GpioUtil.new(pin: red_pin, mode: 'soft_pwm')
   end
 
   def green
-    @green ||= GpioUtil.new(pin: green_pin)
+    @green ||= GpioUtil.new(pin: green_pin, mode: 'soft_pwm')
   end
 
   def blue
-    @blue ||= GpioUtil.new(pin: blue_pin)
+    @blue ||= GpioUtil.new(pin: blue_pin, mode: 'soft_pwm')
   end
 
   def pins
