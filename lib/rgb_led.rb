@@ -67,6 +67,6 @@ class RgbLed
 
   def corrected_value(value)
     # Add modes later maybe.
-    abs 1.0 - value.to_f
+    (1.0 - value.to_f).abs
   end
 end
