@@ -22,16 +22,16 @@ RSpec.describe RgbLed, type: :unit do
     it 'creates a GpioUtil for each pin' do
       subject.install!
 
-      expect(GpioUtil).to have_received(:new).once.with(pin: red_pin)
-      expect(GpioUtil).to have_received(:new).once.with(pin: green_pin)
-      expect(GpioUtil).to have_received(:new).once.with(pin: blue_pin)
+      expect(GpioUtil).to have_received(:new).once.with(pin: red_pin, mode: 'soft_pwm')
+      expect(GpioUtil).to have_received(:new).once.with(pin: green_pin, mode: 'soft_pwm')
+      expect(GpioUtil).to have_received(:new).once.with(pin: blue_pin, mode: 'soft_pwm')
     end
 
     it 'exports all pins as soft pwm outputs and writes 1' do
       subject.install!
 
       expect(mock_gpio_util).to have_received(:export).exactly(3).times.with(set_mode: 'soft_pwm')
-      expect(mock_gpio_util).to have_received(:write).exactly(3).times.with(1)
+      expect(mock_gpio_util).to have_received(:write).exactly(3).times.with(value: 1)
     end
   end
 
@@ -39,7 +39,7 @@ RSpec.describe RgbLed, type: :unit do
     it 'unexports all pins as outputs and writes 1' do
       subject.uninstall!
 
-      expect(mock_gpio_util).to have_received(:write).exactly(3).times.with(1)
+      expect(mock_gpio_util).to have_received(:write).exactly(3).times.with(value: 1)
       expect(mock_gpio_util).to have_received(:unexport).exactly(3).times
     end
   end
