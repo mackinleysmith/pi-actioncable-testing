@@ -52,7 +52,7 @@ class RgbLed
   end
 
   def set_pin(pin, value)
-    pin.write(corrected_value(value))
+    pin.write(value: corrected_value(value))
   end
 
   def set_red(value)
