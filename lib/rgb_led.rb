@@ -9,11 +9,11 @@ class RgbLed
   end
 
   def install!
-    pins.each{|pin| pin.export(set_mode: 'soft_pwm'); pin.write(1) }
+    pins.each{|pin| pin.export(set_mode: 'soft_pwm'); pin.write(value: 1) }
   end
 
   def uninstall!
-    pins.each{|pin| pin.write(1); pin.unexport }
+    pins.each{|pin| pin.write(value: 1); pin.unexport }
   end
 
   def set(r:, g:, b:)
